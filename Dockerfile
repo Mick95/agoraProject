@@ -1,16 +1,10 @@
-FROM gcc:latest 
+FROM ubuntu:latest
 
-WORKDIR /tmp/cmake
-#download Cmake and unzip it
-RUN wget https://cmake.org/files/v3.11/cmake-3.11.1.tar.gz && \
-	tar -xzvf cmake-3.11.1.tar.gz > /dev/null
+RUN apt-get update && apt-get -y install wget \
+	tar \
+	make \
+	cmake
+WORKID \margot
+RUN wget https://gitlab.com/margot_project/core/-/archive/master/core-master.tar.gz && \
+	tar -xzvf core-master.tar.gz
 
-WORKDIR cmake-3.11.1
-
-RUN ./bootstrap > /dev/null && \
-    make -j$(nproc --all) > /dev/null && \
-    make install > /dev/null
-
-WORKDIR /
-#remove installation file
-RUN rm -rf /tmp/cmake
