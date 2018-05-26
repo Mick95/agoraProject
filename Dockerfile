@@ -1,6 +1,5 @@
 FROM ubuntu:16.04
 
-RUN adduser --disabled-password --disabled-login agora && su - agora
 
 # Download package 
 RUN apt-get update && apt-get -y install build-essential gcc make cmake cmake-gui cmake-curses-gui
@@ -52,10 +51,6 @@ RUN echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | tee -a /e
 
 WORKDIR /core-master/build
 
-ENV CASSANDRA_CONFIG /etc/cassandra
-RUN  cd .. && cd .. && mkdir -p /var/lib/cassandra "$CASSANDRA_CONFIG" \
-	&& chown -R cassandra:cassandra /var/lib/cassandra "$CASSANDRA_CONFIG" \
-	&& chmod 777 /var/lib/cassandra "$CASSANDRA_CONFIG"
 
 # Install mARGOT
 RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master .. 
