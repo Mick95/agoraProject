@@ -1,5 +1,7 @@
 FROM ubuntu:16.04
 
+RUN adduser --disabled-password --disabled-login agora && su - agora
+
 # Download package 
 RUN apt-get update && apt-get -y install build-essential gcc make cmake cmake-gui cmake-curses-gui
 RUN apt-get update && apt-get -y install openssl
@@ -33,15 +35,6 @@ RUN git clone https://github.com/eclipse/paho.mqtt.cpp && cd paho.mqtt.cpp && mk
 	make && make install
 RUN apt-get -y install cxxtest
 
-
-# Prepare For Cassandra
-#RUN add-apt-repository ppa:webupd8team/java && apt-get update && apt-get -y install oracle-java8-set-default
-#RUN apt-get update && apt-get -y install default-jdk
-#RUN curl https://www.apache.org/dist/cassandra/KEYS | apt-key add - && \
-#	apt-key adv --keyserver pool.sks-keyservers.net --recv-key A278B781FE4B2BDA
-
-
-
 # Download and install Cassandra
 RUN wget http://downloads.datastax.com/cpp-driver/ubuntu/16.04/dependencies/libuv/v1.20.0/libuv_1.20.0-1_amd64.deb && \
 	wget http://downloads.datastax.com/cpp-driver/ubuntu/16.04/dependencies/libuv/v1.20.0/libuv-dev_1.20.0-1_amd64.deb && \
@@ -57,24 +50,21 @@ RUN echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | tee -a /e
 	curl https://www.apache.org/dist/cassandra/KEYS | apt-key add - && \
 	apt-get update && apt-get -y install cassandra
 
-
-
-#RUN pecl channel-update pecl.php.net 
-#RUN pecl install cassandra
-#RUN sh -c 'echo "extension=cassandra.so" > /etc/php/7.0/mods-available/cassandra.ini'
-#RUN phpenmod cassandra
-
 WORKDIR /core-master/build
 
+ENV CASSANDRA_CONFIG /etc/cassandra
+RUN  cd .. && cd .. && mkdir -p /var/lib/cassandra "$CASSANDRA_CONFIG" \
+	&& chown -R cassandra:cassandra /var/lib/cassandra "$CASSANDRA_CONFIG" \
+	&& chmod 777 /var/lib/cassandra "$CASSANDRA_CONFIG"
+
 # Install mARGOT
-RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master -DWITH_TEST=ON .. && make && make install
+RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master .. 
 
-WORKDIR /core-master/agora
-RUN mosquitto -d  && cassandra -R \
-	agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins
+CMD service cassandra start && mosquitto -d && make && make install && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
 
-#RUN cd .. && wget https://gitlab.com/margot_project/tutorial/-/archive/master/tutorial-master.tar.gz && \
-#	tar -xzvf tutorial-master.tar.gz && cd tutorial-master/ && \
-#	cp -r /core-master/margot_heel/margot_heel_if/ . && \
-#	rm margot_heel_if/config/*.conf && cp config/*.conf margot_heel_if/config/ && \
-#	cd margot_heel_if/ && mkdir build && cd build && cmake .. && make
+
+#WORKDIR /core-master/agora
+#RUN mosquitto -d
+#RUN  cassandra && service cassandra status
+#RUN mosquitto -d  && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins
+
