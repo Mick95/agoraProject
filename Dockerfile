@@ -53,13 +53,7 @@ WORKDIR /core-master/build
 
 
 # Install mARGOT
-RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master .. 
+RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master .. && make && make install
 
-CMD service cassandra start && mosquitto -d && make && make install && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
-
-
-#WORKDIR /core-master/agora
-#RUN mosquitto -d
-#RUN  cassandra && service cassandra status
-#RUN mosquitto -d  && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins
+CMD service cassandra start && mosquitto -d && sleep 10 && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
 
