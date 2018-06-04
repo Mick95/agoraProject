@@ -55,5 +55,27 @@ WORKDIR /core-master/build
 # Install mARGOT
 RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master .. && make && make install
 
-CMD service cassandra start && mosquitto -d && sleep 10 && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
+
+RUN  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+	python get-pip.py && \
+	pip install cassandra-driver
+RUN echo "import time" >> check.py && \
+echo "from cassandra.cluster import Cluster" >> check.py && \
+echo "timer = 0 " >> check.py && \
+echo "x = False " >> check.py && \
+echo "while x == False: " >> check.py && \
+echo "  time.sleep(1)" >> check.py && \
+echo "  timer = timer + 1" >> check.py && \
+echo "  print timer " >> check.py && \
+echo "  try: " >> check.py && \
+echo "    cluster = Cluster()" >> check.py && \
+echo "    cluster.connect() " >> check.py && \
+echo "    x=True " >> check.py && \
+echo "  except: " >> check.py && \
+echo "    if timer == 120:  " >> check.py && \
+echo "      x=True " >> check.py 
+
+EXPOSE 1883
+
+CMD service cassandra start && service mosquitto start && python check.py && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
 
