@@ -52,13 +52,19 @@ RUN echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | tee -a /e
 WORKDIR /core-master/build
 
 
+RUN cd .. && cd agora && cd plugins && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+	python get-pip.py && pip install --user --upgrade cassandra-driver
+
+RUN cd .. && cd agora && cd plugins && apt-get update && apt-get -y install r-base r-base-dev r-cran-rgl
+RUN cd .. && cd agora && cd plugins && \
+	Rscript -e "install.packages('Hmisc',repos = 'http://cran.rstudio.com/')" 
+RUN cd .. && cd agora && cd plugins  && \ 
+	Rscript -e "install.packages('crs', dependencies=TRUE,repos = 'http://cran.rstudio.com/')"
+
 # Install mARGOT
 RUN cmake -DCMAKE_CURRENT_SOURCE_DIR=../ -DWITH_AGORA=ON /core-master .. && make && make install
 
 
-RUN  curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-	python get-pip.py && \
-	pip install cassandra-driver
 RUN echo "import time" >> check.py && \
 echo "from cassandra.cluster import Cluster" >> check.py && \
 echo "timer = 0 " >> check.py && \
@@ -77,5 +83,5 @@ echo "      x=True " >> check.py
 
 EXPOSE 1883
 
-CMD service cassandra start && service mosquitto start && python check.py && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
+CMD service cassandra start && mosquitto -d -p 1883 && python check.py && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
 
