@@ -89,5 +89,5 @@ echo "      x=True " >> check.py
 # Indirizzo ip di questo docker è 172.17.0.2 e non 127.0.0.1
 EXPOSE 1883
 
-CMD service cassandra start && mosquitto -d -p 1883 && python check.py && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
+#CMD service cassandra start && mosquitto -d -p 1883 && python check.py && agora --workspace_folder /core-master/agora/build --plugin_folder /core-master/agora/plugins 
 
