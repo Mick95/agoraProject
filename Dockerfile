@@ -12,7 +12,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN export DEBIAN_FRONTEND="noninteractive"
 RUN apt-get -y install php-pear php7.0-dev
 RUN apt-get -y install libgmp-dev
-RUN apt-get -y install software-properties-common
+RUN apt-get update && apt-get -y install software-properties-common
 
 
 # Download Mosquitto for MQTT 
@@ -24,17 +24,20 @@ RUN wget https://gitlab.com/margot_project/core/-/archive/master/core-master.tar
 	tar -xzvf core-master.tar.gz 
 
 WORKDIR /core-master/agora/build
-
+ 
 
 # Download MQTT C 
 RUN git clone https://github.com/eclipse/paho.mqtt.c && \
-	cd paho.mqtt.c && git checkout -t origin/develop && \
+	cd paho.mqtt.c && git checkout a66faf8c986f74a3ddb1674e325e085dba9b9e03   && \
 	mkdir build && cd build && cmake -DPAHO_BUILD_STATIC=TRUE -DPAHO_WITH_SSL=TRUE .. &&  \
 	make  && make install 
 
 
 # Download MQTT C++
-RUN git clone https://github.com/eclipse/paho.mqtt.cpp && cd paho.mqtt.cpp && mkdir build && cd build && cmake -DPAHO_WITH_SSL=TRUE .. && \
+RUN git clone https://github.com/eclipse/paho.mqtt.cpp && cd paho.mqtt.cpp && \
+	git checkout 16573488fa699ac94d920024736974a2206b794b && \
+	mkdir build && cd build && \
+	cmake -DPAHO_WITH_SSL=TRUE .. && \
 	make && make install
 RUN apt-get -y install cxxtest
 
