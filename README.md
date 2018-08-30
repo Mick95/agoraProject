@@ -11,7 +11,24 @@ in the execution environment or in the application requirements.
 The docker image is based on ubuntu:16.04.
 
 # dependencies
-The agora server needs several dependencies to work that are presented in the PowerPoint presentation.
+The agora server needs several dependencies to work:
+
+C/C++ MQTT client implementation
+
+MQTT broker (I used Mosquitto)
+
+C/C++ Cassandra driver
+
 
 # how to execute agora
-there are 2 ways to execute the agora server, both of them are described in the PowerPoint presentation with pictures to guide the user.
+There are 2 ways to execute the agora server.
+
+The first one is to download directly the docker image, and then execute the following codeline:
+
+#### docker pull gennaiolimick/agora
+ 
+#### docker run –ti gennaiolimick/agora
+
+The other one is to download the Dockerfile from the GitHub repository, build it and then run it.
+
+Both methods are explained in the PowerPoint presentation with pictures to guide the user.
